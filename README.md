@@ -1,3 +1,9 @@
+## How to use?
+
+```shell
+python3 gettext-rs.py [app-name] [src-dir] [build-dir]
+```
+
 ## Why?
 
 For some reason, normal ninja pot generator doesn't detect
