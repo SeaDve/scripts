@@ -5,7 +5,7 @@ import sys
 import subprocess
 
 if len(sys.argv) != 4:
-    print("Usage: gettext-rs <app-name> <src-dir> <build-dir>")
+    print("Usage: gettext-rs [meson-project-name] [src-dir] [build-dir]")
     sys.exit()
     
 app_name = sys.argv[1]
