@@ -1,7 +1,7 @@
 ## How to use?
 
 ```shell
-python3 gettext-rs.py [app-name] [src-dir] [build-dir]
+python3 -m gettext-rs [meson-project-name] [src-dir] [build-dir]
 ```
 
 ## Why?
