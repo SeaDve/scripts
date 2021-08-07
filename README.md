@@ -1,5 +1,3 @@
-Simple script to generate pot file.
-
 ## Why?
 
 For some reason, normal ninja pot generator doesn't detect
