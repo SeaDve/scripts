@@ -23,7 +23,7 @@ src_dir = os.path.abspath(sys.argv[2])
 build_dir = os.path.abspath(sys.argv[3])
 
 try:
-    if input("Commit or stash unsaved changes before proceeding [y/N]") not in ("y", "Y"):
+    if input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") not in ("y", "Y"):
         sys.exit()
 except KeyboardInterrupt:
     sys.exit()
