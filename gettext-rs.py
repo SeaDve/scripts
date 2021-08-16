@@ -29,11 +29,11 @@ if input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") no
 log("Replacing 'gettext!' with 'gettext'...")
 subprocess.run(f"find {args.src_dir} -type f -exec sed -i 's/gettext!/gettext/g' {{}} \;", shell=True, check=True)
 
-log(f"Running ninja -C {args.build_dir} {args.project_name}-pot...")
 try:
-    subprocess.run(f"ninja -C {args.build_dir} {args.project_name}-pot", shell=True, check=True)
+    log(f"Generating pot file...")
+    subprocess.run(["ninja", "-C", args.build_dir, f"{args.project_name}-pot"], check=True)
 except subprocess.CalledProcessError:
     pass
 finally:
     log("Restoring directory...")
-    subprocess.run(f"git restore {args.src_dir}", shell=True, check=True)
+    subprocess.run(["git", "restore", args.src_dir], check=True)
