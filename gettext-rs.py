@@ -27,10 +27,10 @@ if input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") no
     sys.exit()
 
 log("Replacing 'gettext!' with 'gettext'...")
-subprocess.run(f"find {args.src_dir} -type f -exec sed -i 's/gettext!/gettext/g' {{}} \;", shell=True, check=True)
+subprocess.run(["find", args.src_dir, "-type", "f", "-exec", "sed", "-i", "s/gettext!/gettext/g", "{}", ";"], check=True)
 
 try:
-    log(f"Generating pot file...")
+    log("Generating pot file...")
     subprocess.run(["ninja", "-C", args.build_dir, f"{args.project_name}-pot"], check=True)
 except subprocess.CalledProcessError:
     pass
