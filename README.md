@@ -17,4 +17,5 @@ file, and restore the previous state.
 python release-notes.py [-h] appstream_file
 ```
 
-Generate a release note based on the latest release in the appstream file.
+Generate a release note based on the latest release in the appstream file. When
+importing succeeds, the text is automatically copied to clipboard.
