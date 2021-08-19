@@ -1,12 +1,12 @@
-## How to use?
+## Personal Scripts
+
+### gettext-rs
 
 ```shell
-python3 -m gettext-rs [meson-project-name] [src-dir] [build-dir]
+python gettext-rs.py [-h] project_name src_dir build_dir
 ```
 
-## Why?
-
-For some reason, normal ninja pot generator doesn't detect
-rust gettext macros (i.e. `gettext!`) even when added as a
-keyword. So, I created this script to automatically remove 
-the `!`, generate the pot file, then restore the state.
+Hack to generate pot files for rust files with gettext macros. For some reason,
+normal ninja pot generator doesn't detect rust gettext macros (i.e. gettext!) 
+even when added as a keyword. This temporarily removes the `!`, generate the pot
+file, and restore the previous state.

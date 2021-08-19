@@ -4,18 +4,7 @@ import argparse
 import subprocess
 import sys
 
-BOLD = "\033[1m"
-BLUE = '\033[34m'
-ENDC = '\033[0m'
-
-
-def print_colored(header, text):
-    print(f"{BOLD}{BLUE}{header}{ENDC}: {text}")
-
-
-def log(text):
-    print_colored("INFO", text)
-
+from utils import log
 
 parser = argparse.ArgumentParser()
 parser.add_argument('project_name', help="The meson project name", type=str)
