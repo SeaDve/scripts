@@ -93,12 +93,23 @@ class Project:
         log("Pushed local changes to origin/main")
 
 
-def make_release_on_dir(project_directory: str, new_version: str):
+def main(project_directory: str, new_version: str):
+    # FIXME uncomment this
+
+    # if input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") not in ("y", "Y"):
+    #     return
+
+
     log(f"Making release for version {new_version}...")
 
     project = Project(project_directory)
     project.set_new_version(new_version)
     project.commit_and_push_changes()
+
+    log("Make sure to also update the pot files")
+    log("Copy and paste this release note to github and make a release")
+
+    # FIXME paste release notes here
 
 # tree = ElementTree.parse(args.appstream_file)
 # root = tree.getroot()
@@ -138,20 +149,10 @@ def make_release_on_dir(project_directory: str, new_version: str):
 
 if __name__ == '__main__':
     import argparse
-    import sys
 
     parser = argparse.ArgumentParser()
     parser.add_argument('project_dir', help="The root directory of the project", type=str)
     parser.add_argument('version', help="The new version in format $N.$N.$N", type=str)
     args = parser.parse_args()
 
-    # FIXME uncomment this
-
-    # if input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") not in ("y", "Y"):
-    #     sys.exit()
-
-    make_release_on_dir(args.project_dir, args.version)
-    log("Make sure to also update the pot files")
-    log("Copy and paste this release note to github and make a release")
-
-    # FIXME paste release notes here
+    main(args.project_dir, args.version)
