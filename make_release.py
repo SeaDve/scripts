@@ -3,6 +3,7 @@
 import os
 import subprocess
 from datetime import datetime
+from typing import Optional
 
 import utils
 from utils import log, c_input
@@ -40,18 +41,19 @@ class Project:
         self.meson_build_file = self._get_meson_build_file()
         self.cargo_toml_file = self._get_cargo_toml_file()
 
-    def _get_metainfo_file(self) -> str:
+    def _get_metainfo_file(self) -> Optional[str]:
         data_files = os.listdir(os.path.join(self.directory, 'data'))
         for file in data_files:
             if 'metainfo' in file or 'appdata' in file:
                 return os.path.join(self.directory, 'data', file)
+        return None
 
-    def _get_meson_build_file(self) -> str:
+    def _get_meson_build_file(self) -> Optional[str]:
         if 'meson.build' in self.files:
             return os.path.join(self.directory, 'meson.build')
         return None
 
-    def _get_cargo_toml_file(self) -> str:
+    def _get_cargo_toml_file(self) -> Optional[str]:
         if 'Cargo.toml' in self.files:
             return os.path.join(self.directory, 'Cargo.toml')
         return None
@@ -65,7 +67,10 @@ class Project:
         log("Meson build file found")
         log("Replacing meson build version with new_version...")
 
-        utils.replace_in_file(r"version:\s*'(.*)'", f"version: '{self.new_version}'", self.meson_build_file)
+        utils.replace_in_file(
+            r"version:\s*'(.*)'", f"version: '{self.new_version}'",
+            self.meson_build_file
+        )
         log("Successfully replaced meson build's version with new version")
 
     def _update_cargo_version(self):
@@ -77,7 +82,10 @@ class Project:
         log("Cargo toml file found")
         log("Replacing cargo toml version with new_version...")
 
-        utils.replace_in_file(r'version\s*=\s*"(.*)"', f'version = "{self.new_version}"', self.cargo_toml_file)
+        utils.replace_in_file(
+            r'version\s*=\s*"(.*)"', f'version = "{self.new_version}"',
+            self.cargo_toml_file
+        )
         log("Successfully replaced cargo toml's version with new version")
 
     def _update_metainfo_release_notes(self):
@@ -127,7 +135,7 @@ class Project:
             print(release_note)
             log("Copy and paste this release note to github and make a release")
 
-    def set_new_version(self, new_version: str):
+    def set_new_version(self, new_version: str) -> None:
         self.new_version = new_version
         self._update_cargo_version()
         self._update_meson_version()
@@ -162,8 +170,10 @@ class Project:
         log("Pushed local changes to origin/main")
 
 
-def main(project_directory: str, new_version: str):
-    if c_input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") not in ("y", "Y"):
+def main(project_directory: str, new_version: str) -> None:
+    if c_input(
+        "Commit or stash unsaved changes before proceeding. Proceed? [y/N]"
+    ) not in ("y", "Y"):
         return
 
     log(f"Making release for version {new_version}...")

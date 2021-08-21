@@ -16,7 +16,10 @@ if c_input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") 
     sys.exit()
 
 log("Replacing 'gettext!' with 'gettext'...")
-subprocess.run(["find", args.src_dir, "-type", "f", "-exec", "sed", "-i", "s/gettext!/gettext/g", "{}", ";"], check=True)
+subprocess.run(
+    ["find", args.src_dir, "-type", "f", "-exec", "sed", "-i", "s/gettext!/gettext/g", "{}", ";"],
+    check=True
+)
 
 try:
     log("Generating pot file...")

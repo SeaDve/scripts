@@ -4,6 +4,7 @@ import re
 import string
 import subprocess
 import tempfile
+from typing import Optional
 
 BOLD = '\033[1m'
 BLUE = '\033[34m'
@@ -11,23 +12,23 @@ TURQUOISE = '\033[36m'
 ENDC = '\033[0m'
 
 
-def print_colored(header: str, text: str):
+def print_colored(header: str, text: str) -> None:
     print(f"{BOLD}{BLUE}{header}{ENDC}: {text}")
 
 
-def log(text: str):
+def log(text: str) -> None:
     print_colored("INFO", text)
 
 
-def input_colored(header: str, text: str):
+def input_colored(header: str, text: str) -> str:
     return input(f"{BOLD}{TURQUOISE}{header}{ENDC}: {text}")
 
 
-def c_input(text: str):
+def c_input(text: str) -> str:
     return input_colored("CONSOLE", text)
 
 
-def replace_in_file(pattern: str, replacement: str, file_directory: str):
+def replace_in_file(pattern: str, replacement: str, file_directory: str) -> None:
     with open(file_directory, 'r+') as file:
         file_contents = file.read()
         new_content = re.sub(pattern, replacement, file_contents, count=1)
@@ -44,11 +45,11 @@ def create_temp_file() -> str:
     return tmp_file_dir
 
 
-def launch_gedit(file_dir: str):
+def launch_gedit(file_dir: str) -> None:
     subprocess.run(['gedit', file_dir], check=True)
 
 
-def get_user_input_from_gedit() -> list:
+def get_user_input_from_gedit() -> Optional[list]:
     tmp_file = create_temp_file()
 
     while True:
@@ -71,6 +72,6 @@ def get_user_input_from_gedit() -> list:
             return None
 
 
-def copy_to_clipboard(text: str):
+def copy_to_clipboard(text: str) -> None:
     echo_text = subprocess.run(["echo", text], check=True, capture_output=True)
     subprocess.run(["xclip", "-selection", "clipboard"], check=True, input=echo_text.stdout)
