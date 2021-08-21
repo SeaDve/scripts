@@ -11,20 +11,20 @@ from utils import log, c_input
 def create_new_release_template(header: str, body: list, version: str) -> str:
     date_now = datetime.now().strftime("%Y-%m-%d")
     new_release_xml = [
-        f'<release version="{version}" date="{date_now}">',
-        f'  <description>',
-        f'    <p>{header}</p>',
-        f'    <ul>',
+        '<release version="{}" date="{}">'.format(version, date_now),
+        '  <description>',
+        '    <p>{}</p>'.format(header),
+        '    <ul>',
     ]
 
     for line in body:
         if line:
-            new_release_xml.append(f"      <li>{line}</li>")
+            new_release_xml.append(f'      <li>{line}</li>')
 
     new_release_xml += [
-        f'    </ul>',
-        f'  </description>',
-        f'</release>',
+        '    </ul>',
+        '  </description>',
+        '</release>',
     ]
 
     new_release_xml = [f"    {line}\n" for line in new_release_xml]
@@ -64,7 +64,7 @@ class Project:
             return
 
         log("Meson build file found")
-        log(f"Replacing meson build version with new_version...")
+        log("Replacing meson build version with new_version...")
 
         utils.replace_in_file(r"version:\s*'(.*)'", f"version: '{self.new_version}'", self.meson_build_file)
         log("Successfully replaced meson build's version with new version")
@@ -76,7 +76,7 @@ class Project:
             return
 
         log("Cargo toml file found")
-        log(f"Replacing cargo toml version with new_version...")
+        log("Replacing cargo toml version with new_version...")
 
         utils.replace_in_file(r'version\s*=\s*"(.*)"', f'version = "{self.new_version}"', self.cargo_toml_file)
         log("Successfully replaced cargo toml's version with new version")
