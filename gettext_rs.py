@@ -27,7 +27,9 @@ def restore_directory(src_dir: str) -> None:
 
 
 def main(project_name: str, src_dir: str, build_dir: str) -> None:
-    if c_input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") not in ("y", "Y"):
+    if c_input(
+        "Commit or stash unsaved changes before proceeding. Proceed? [y/N]"
+    ) not in ("y", "Y"):
         return
 
     try:
