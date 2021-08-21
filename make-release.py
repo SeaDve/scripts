@@ -3,11 +3,9 @@
 import os
 import subprocess
 from datetime import datetime
-from xml.etree import ElementTree
-from xml.dom import minidom
 
 import utils
-from utils import log
+from utils import log, c_input
 
 
 def create_new_release_template(header: str, body: list, version: str) -> str:
@@ -70,7 +68,6 @@ class Project:
 
         utils.replace_in_file(r"version:\s*'(.*)'", f"version: '{self.new_version}'", self.meson_build_file)
         log("Successfully replaced meson build's version with new version")
-
 
     def _update_cargo_version(self):
         if self.cargo_toml_file is None:
@@ -149,7 +146,7 @@ class Project:
         self._update_metainfo_release_notes()
 
     def commit_and_push_changes(self):
-        if input("Do you want to commit the changes? [y/N]") not in ("y", "Y"):
+        if c_input("Do you want to commit the changes? [y/N]") not in ("y", "Y"):
             return
 
         if self.metainfo_file is not None:
@@ -167,7 +164,7 @@ class Project:
         subprocess.run(['git', 'commit', '-m', f'chore: Bump to {self.new_version}'], check=True)
         log("Changes committed")
 
-        if input("Do you want to push the changes? [y/N]") not in ("y", "Y"):
+        if c_input("Do you want to push the changes? [y/N]") not in ("y", "Y"):
             return
 
         subprocess.run(['git', 'pull', 'origin', 'main'], check=True)
@@ -178,7 +175,7 @@ class Project:
 
 
 def main(project_directory: str, new_version: str):
-    if input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") not in ("y", "Y"):
+    if c_input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") not in ("y", "Y"):
         return
 
     log(f"Making release for version {new_version}...")

@@ -4,7 +4,7 @@ import argparse
 import subprocess
 import sys
 
-from utils import log
+from utils import log, c_input
 
 parser = argparse.ArgumentParser()
 parser.add_argument('project_name', help="The meson project name", type=str)
@@ -12,7 +12,7 @@ parser.add_argument('src_dir', help="The source directory", type=str)
 parser.add_argument('build_dir', help="The building directory", type=str)
 args = parser.parse_args()
 
-if input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") not in ("y", "Y"):
+if c_input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") not in ("y", "Y"):
     sys.exit()
 
 log("Replacing 'gettext!' with 'gettext'...")
