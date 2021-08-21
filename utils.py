@@ -57,11 +57,9 @@ def get_user_input_from_gedit() -> list:
 
         with open(tmp_file) as file:
             file_output = file.read().strip().splitlines()
+            file_output = [line for line in file_output if line]
 
             for index, line in enumerate(file_output):
-                if not line:
-                    continue
-
                 if index == 0:
                     print(line)
                 else:

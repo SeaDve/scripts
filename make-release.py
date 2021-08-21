@@ -18,8 +18,7 @@ def create_new_release_template(header: str, body: list, version: str) -> str:
     ]
 
     for line in body:
-        if line:
-            new_release_xml.append(f'      <li>{line}</li>')
+        new_release_xml.append(f'      <li>{line}</li>')
 
     new_release_xml += [
         '    </ul>',
