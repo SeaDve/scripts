@@ -1,5 +1,9 @@
+import os
+import random
 import re
+import string
 import subprocess
+import tempfile
 
 BOLD = '\033[1m'
 BLUE = '\033[34m'
@@ -33,11 +37,6 @@ def replace_in_file(pattern: str, replacement: str, file_directory: str):
 
 
 def create_temp_file() -> str:
-    import os
-    import random
-    import string
-    import tempfile
-
     tmp_file_name = ''.join(random.choice(string.ascii_letters) for _ in range(10))
     tmp_file_location = tempfile.gettempdir()
     tmp_file_dir = os.path.join(tmp_file_location, tmp_file_name)
@@ -74,4 +73,4 @@ def get_user_input_from_gedit() -> list:
 
 def copy_to_clipboard(text: str):
     echo_text = subprocess.run(["echo", text], check=True, capture_output=True)
-    subprocess.run(["xclip", "-selection", "clipboard"], input=echo_text.stdout)
+    subprocess.run(["xclip", "-selection", "clipboard"], check=True, input=echo_text.stdout)
