@@ -51,6 +51,9 @@ def get_user_input_from_gedit() -> list:
 
             print()
             for index, line in enumerate(file_output):
+                if not line:
+                    continue
+
                 if index == 0:
                     print(line)
                 else:
