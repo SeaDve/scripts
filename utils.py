@@ -54,7 +54,7 @@ def create_temp_file() -> str:
     return tmp_file_dir
 
 
-def launch_default_for_uri(uri: str) -> None:
+def launch_web_for_uri(uri: str) -> None:
     webbrowser.open(uri)
 
 

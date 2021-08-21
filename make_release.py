@@ -24,7 +24,7 @@ def show_diff_main_branch_from_last_tagged(metainfo_file: str) -> None:
     ).stdout
 
     uri = os.path.join(homepage_uri, 'compare', f'{last_tagged_version}...main')
-    utils.launch_default_for_uri(uri)
+    utils.launch_web_for_uri(uri)
 
 
 def find_homepage(metainfo_file: str) -> Optional[str]:
