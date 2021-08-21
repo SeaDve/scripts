@@ -4,7 +4,7 @@ import os
 import re
 import subprocess
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 import utils
 from utils import log, c_input
@@ -41,7 +41,7 @@ def find_homepage(metainfo_file: str) -> Optional[str]:
     return match.group(1)
 
 
-def create_new_release_template(header: str, body: list, version: str) -> str:
+def create_new_release_template(header: str, body: List[str], version: str) -> str:
     date_now = datetime.now().strftime("%Y-%m-%d")
     new_release_xml = [
         '<release version="{}" date="{}">'.format(version, date_now),
@@ -90,7 +90,7 @@ class Project:
             return os.path.join(self.directory, 'Cargo.toml')
         return None
 
-    def _update_meson_version(self):
+    def _update_meson_version(self) -> None:
         if self.meson_build_file is None:
             log("Meson build file not found")
             log("Skipping meson version update...")
@@ -105,7 +105,7 @@ class Project:
         )
         log("Successfully replaced meson build's version with new version")
 
-    def _update_cargo_version(self):
+    def _update_cargo_version(self) -> None:
         if self.cargo_toml_file is None:
             log("Cargo toml file not found")
             log("Skipping cargo version update...")
@@ -120,7 +120,12 @@ class Project:
         )
         log("Successfully replaced cargo toml's version with new version")
 
-    def _update_metainfo_release_notes(self):
+    def _update_metainfo_release_notes(self) -> None:
+        if self.metainfo_file is None:
+            log("Metainfo file not found")
+            log("Skipping metainfo release notes update...")
+            return
+
         log("Showing changes from last tagged version to main branch...")
         show_diff_main_branch_from_last_tagged(self.metainfo_file)
 
@@ -130,11 +135,6 @@ class Project:
         output = utils.get_user_input_from_gedit()
         if output is None:
             log("Failed to get release notes")
-            log("Skipping metainfo release notes update...")
-            return
-
-        if self.metainfo_file is None:
-            log("Metainfo file not found")
             log("Skipping metainfo release notes update...")
             return
 
@@ -176,7 +176,7 @@ class Project:
         self._update_meson_version()
         self._update_metainfo_release_notes()
 
-    def commit_and_push_changes(self):
+    def commit_and_push_changes(self) -> None:
         if c_input("Do you want to commit the changes? [y/N]") not in ("y", "Y"):
             return
 

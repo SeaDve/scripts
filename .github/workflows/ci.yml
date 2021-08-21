@@ -41,4 +41,4 @@ jobs:
           sudo apt -y install mypy
       - name: Check with MyPy
         run: |
-          mypy --ignore-missing-imports --disallow-incomplete-defs .
+          mypy --strict .

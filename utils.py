@@ -5,7 +5,7 @@ import string
 import subprocess
 import tempfile
 import webbrowser
-from typing import Optional
+from typing import Optional, List
 
 BOLD = '\033[1m'
 BLUE = '\033[34m'
@@ -62,7 +62,7 @@ def launch_gedit(file_dir: str) -> None:
     subprocess.run(['gedit', file_dir], check=True)
 
 
-def get_user_input_from_gedit() -> Optional[list]:
+def get_user_input_from_gedit() -> Optional[List[str]]:
     tmp_file = create_temp_file()
 
     while True:
