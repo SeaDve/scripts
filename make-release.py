@@ -29,7 +29,8 @@ def create_new_release_template(header: str, body: list, version: str) -> str:
         f'</release>',
     ]
 
-    return"\n".join(new_release_xml)
+    new_release_xml = [f"    {line}\n" for line in new_release_xml]
+    return "".join(new_release_xml)
 
 
 class Project:
