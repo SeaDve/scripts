@@ -4,6 +4,7 @@ import re
 import string
 import subprocess
 import tempfile
+import webbrowser
 from typing import Optional
 
 BOLD = '\033[1m'
@@ -28,6 +29,14 @@ def c_input(text: str) -> str:
     return input_colored("CONSOLE", text)
 
 
+def find_in_file(pattern: str, file_directory: str) -> Optional[str]:
+    with open(file_directory) as file:
+        for line in file:
+            if pattern in line:
+                return line
+        return None
+
+
 def replace_in_file(pattern: str, replacement: str, file_directory: str) -> None:
     with open(file_directory, 'r+') as file:
         file_contents = file.read()
@@ -43,6 +52,10 @@ def create_temp_file() -> str:
     tmp_file_dir = os.path.join(tmp_file_location, tmp_file_name)
     subprocess.run(['touch', tmp_file_dir], check=True)
     return tmp_file_dir
+
+
+def launch_default_for_uri(uri: str) -> None:
+    webbrowser.open(uri)
 
 
 def launch_gedit(file_dir: str) -> None:
@@ -73,5 +86,5 @@ def get_user_input_from_gedit() -> Optional[list]:
 
 
 def copy_to_clipboard(text: str) -> None:
-    echo_text = subprocess.run(["echo", text], check=True, capture_output=True)
-    subprocess.run(["xclip", "-selection", "clipboard"], check=True, input=echo_text.stdout)
+    echo_text = subprocess.run(['echo', text], check=True, capture_output=True)
+    subprocess.run(['xclip', '-selection', 'clipboard'], check=True, input=echo_text.stdout)

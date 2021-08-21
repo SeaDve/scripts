@@ -1,12 +1,44 @@
 #!/usr/bin/env python3
 
 import os
+import re
 import subprocess
 from datetime import datetime
 from typing import Optional
 
 import utils
 from utils import log, c_input
+
+
+def show_diff_main_branch_from_last_tagged(metainfo_file: str) -> None:
+    homepage_uri = find_homepage(metainfo_file)
+
+    if not homepage_uri:
+        log("No homepage uri found")
+        log("Skipping show diff of main branch from last tagged")
+        return
+
+    last_tagged_version = subprocess.run(
+        ['git', 'describe', '--tags', '--abbrev=0'],
+        check=True, capture_output=True, text=True
+    ).stdout
+
+    uri = os.path.join(homepage_uri, 'compare', f'{last_tagged_version}...main')
+    utils.launch_default_for_uri(uri)
+
+
+def find_homepage(metainfo_file: str) -> Optional[str]:
+    line = utils.find_in_file("homepage", metainfo_file)
+
+    if not line:
+        return None
+
+    match = re.search('>(.*)<', line)
+
+    if not match:
+        return None
+
+    return match.group(1)
 
 
 def create_new_release_template(header: str, body: list, version: str) -> str:
@@ -89,6 +121,9 @@ class Project:
         log("Successfully replaced cargo toml's version with new version")
 
     def _update_metainfo_release_notes(self):
+        log("Showing changes from last tagged version to main branch...")
+        show_diff_main_branch_from_last_tagged(self.metainfo_file)
+
         log("Launching Gedit...")
         log("Write the release notes in the window and save the file")
 
