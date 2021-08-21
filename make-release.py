@@ -2,10 +2,34 @@
 
 import os
 import subprocess
+from datetime import datetime
 from xml.etree import ElementTree
+from xml.dom import minidom
 
 import utils
-from utils import log, multiline_input
+from utils import log
+
+
+def create_new_release_template(header: str, body: list, version: str):
+    date_now = datetime.now().strftime("%Y-%m-%d")
+    new_release_xml = [
+        f'<release version="{version}" date="{date_now}">',
+        f'  <description>',
+        f'    <p>{header}</p>',
+        f'    <ul>',
+    ]
+
+    for line in body:
+        if line:
+            new_release_xml.append(f"      <li>{line}</li>")
+
+    new_release_xml += [
+        f'    </ul>',
+        f'  </description>',
+        f'</release>',
+    ]
+
+    return"\n".join(new_release_xml)
 
 
 class Project:
@@ -35,34 +59,64 @@ class Project:
         return None
 
     def _update_meson_version(self):
-        if self.meson_build_file is not None:
-            log("Meson build file found")
-            log(f"Replacing meson build version with new_version...")
-
-            utils.replace_in_file(r"version:\s*'(.*)'", f"version: '{self.new_version}'", self.meson_build_file)
-            log("Successfully replaced meson build's version with new version")
-        else:
+        if self.meson_build_file is None:
             log("Meson build file not found")
             log("Skipping meson version update...")
+            return
+
+        log("Meson build file found")
+        log(f"Replacing meson build version with new_version...")
+
+        utils.replace_in_file(r"version:\s*'(.*)'", f"version: '{self.new_version}'", self.meson_build_file)
+        log("Successfully replaced meson build's version with new version")
+
 
     def _update_cargo_version(self):
-        if self.cargo_toml_file is not None:
-            log("Cargo toml file found")
-            log(f"Replacing cargo toml version with new_version...")
-
-            utils.replace_in_file(r'version\s*=\s*"(.*)"', f'version = "{self.new_version}"', self.cargo_toml_file)
-            log("Successfully replaced cargo toml's version with new version")
-        else:
+        if self.cargo_toml_file is None:
             log("Cargo toml file not found")
             log("Skipping cargo version update...")
+            return
 
-    def _update_metainfo_release_notes(self, release_notes: str):
-        raise NotImplementedError
+        log("Cargo toml file found")
+        log(f"Replacing cargo toml version with new_version...")
+
+        utils.replace_in_file(r'version\s*=\s*"(.*)"', f'version = "{self.new_version}"', self.cargo_toml_file)
+        log("Successfully replaced cargo toml's version with new version")
+
+    def _update_metainfo_release_notes(self):
+        log("Launching Gedit...")
+        log("Write the release notes in the window and save the file")
+
+        output = utils.get_user_input_from_gedit()
+        if output is None:
+            log("Failed to get release notes")
+            log("Skipping metainfo release notes update...")
+            return
+
+        if self.metainfo_file is None:
+            log("Metainfo file not found")
+            log("Skipping metainfo release notes update...")
+            return
+
+        header = output.pop(0)
+        body = output
+
+        tree = ElementTree.parse(self.metainfo_file)
+        root = tree.getroot()
+        releases = root.find('releases')
+
+        new_release = ElementTree.fromstring(create_new_release_template(header, body, self.new_version))
+        releases.insert(0, new_release)
+
+        tree.write(self.metainfo_file, encoding='utf-8')
+
+        utils.prettify_xml_file(self.metainfo_file)
 
     def set_new_version(self, new_version: str):
         self.new_version = new_version
         self._update_cargo_version()
         self._update_meson_version()
+        self._update_metainfo_release_notes()
 
     def commit_and_push_changes(self):
         if input("Do you want to commit the changes? [y/N]") not in ("y", "Y"):
@@ -94,11 +148,8 @@ class Project:
 
 
 def main(project_directory: str, new_version: str):
-    # FIXME uncomment this
-
-    # if input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") not in ("y", "Y"):
-    #     return
-
+    if input("Commit or stash unsaved changes before proceeding. Proceed? [y/N]") not in ("y", "Y"):
+        return
 
     log(f"Making release for version {new_version}...")
 
