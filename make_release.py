@@ -4,13 +4,14 @@ import os
 import re
 import subprocess
 from datetime import datetime
+from pathlib import Path
 from typing import Optional, List
 
 import utils
 from utils import log, c_input
 
 
-def show_diff_main_branch_from_last_tagged(metainfo_file: str) -> None:
+def show_diff_main_branch_from_last_tagged(metainfo_file: Path) -> None:
     homepage_uri = find_homepage(metainfo_file)
 
     if not homepage_uri:
@@ -27,7 +28,7 @@ def show_diff_main_branch_from_last_tagged(metainfo_file: str) -> None:
     utils.launch_web_for_uri(uri)
 
 
-def find_homepage(metainfo_file: str) -> Optional[str]:
+def find_homepage(metainfo_file: Path) -> Optional[str]:
     line = utils.find_in_file("homepage", metainfo_file)
 
     if not line:
@@ -65,7 +66,7 @@ def create_new_release_template(header: str, body: List[str], version: str) -> s
 
 class Project:
 
-    def __init__(self, directory: str):
+    def __init__(self, directory: Path):
         self.directory = directory
         self.files = os.listdir(self.directory)
 
@@ -73,21 +74,21 @@ class Project:
         self.meson_build_file = self._get_meson_build_file()
         self.cargo_toml_file = self._get_cargo_toml_file()
 
-    def _get_metainfo_file(self) -> Optional[str]:
-        data_files = os.listdir(os.path.join(self.directory, 'data'))
+    def _get_metainfo_file(self) -> Optional[Path]:
+        data_files = os.listdir(self.directory / 'data')
         for file in data_files:
             if 'metainfo' in file or 'appdata' in file:
-                return os.path.join(self.directory, 'data', file)
+                return self.directory / 'data' / file
         return None
 
-    def _get_meson_build_file(self) -> Optional[str]:
+    def _get_meson_build_file(self) -> Optional[Path]:
         if 'meson.build' in self.files:
-            return os.path.join(self.directory, 'meson.build')
+            return self.directory / 'meson.build'
         return None
 
-    def _get_cargo_toml_file(self) -> Optional[str]:
+    def _get_cargo_toml_file(self) -> Optional[Path]:
         if 'Cargo.toml' in self.files:
-            return os.path.join(self.directory, 'Cargo.toml')
+            return self.directory / 'Cargo.toml'
         return None
 
     def _update_meson_version(self) -> None:
@@ -144,7 +145,7 @@ class Project:
         log("Metainfo file found")
         log("Updating the metainfo file with the provided release notes and version")
 
-        with open(self.metainfo_file, 'r+') as file:
+        with self.metainfo_file.open(mode='r+') as file:
             file_lines = file.readlines()
             for index, line in enumerate(file_lines):
                 if '<releases>' in line:
@@ -205,7 +206,7 @@ class Project:
         log("Pushed local changes to origin/main")
 
 
-def main(project_directory: str, new_version: str) -> None:
+def main(project_directory: Path, new_version: str) -> None:
     if c_input(
         "Commit or stash unsaved changes before proceeding. Proceed? [y/N]"
     ) not in ("y", "Y"):
@@ -224,7 +225,7 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('project_dir', help="The root directory of the project", type=str)
+    parser.add_argument('project_dir', help="The root directory of the project", type=Path)
     parser.add_argument('version', help="The new version in format $N.$N.$N", type=str)
     args = parser.parse_args()
 
