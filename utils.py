@@ -23,10 +23,6 @@ def replace_in_file(pattern: str, replacement: str, file_directory: str):
         file.write(new_content)
 
 
-def multiline_input() -> str:
-    raise NotImplementedError
-
-
 def create_temp_file() -> str:
     import os
     import random

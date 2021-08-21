@@ -10,7 +10,7 @@ import utils
 from utils import log
 
 
-def create_new_release_template(header: str, body: list, version: str):
+def create_new_release_template(header: str, body: list, version: str) -> str:
     date_now = datetime.now().strftime("%Y-%m-%d")
     new_release_xml = [
         f'<release version="{version}" date="{date_now}">',
@@ -101,16 +101,15 @@ class Project:
         header = output.pop(0)
         body = output
 
-        tree = ElementTree.parse(self.metainfo_file)
-        root = tree.getroot()
-        releases = root.find('releases')
-
-        new_release = ElementTree.fromstring(create_new_release_template(header, body, self.new_version))
-        releases.insert(0, new_release)
-
-        tree.write(self.metainfo_file, encoding='utf-8')
-
-        utils.prettify_xml_file(self.metainfo_file)
+        with open(self.metainfo_file, 'r+') as file:
+            file_lines = file.readlines()
+            for index, line in enumerate(file_lines):
+                if '<releases>' in line:
+                    release_template = create_new_release_template(header, body, self.new_version)
+                    file_lines.insert(index + 1, release_template)
+            file.truncate(0)
+            file.seek(0)
+            file.writelines(file_lines)
 
     def set_new_version(self, new_version: str):
         self.new_version = new_version
