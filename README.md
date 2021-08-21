@@ -21,5 +21,5 @@ Replaces the version on meson.build and Cargo.toml to the version provided. It
 skips them when the files are not found. It also opens gedit to ask for release
 notes which will be written automatically to the metainfo file. It is also 
 skipped when either the file is not found or cancelled. Finally, the changes are
-committed and pushed when not cancelled. The release notes are also printed in
-the terminal for other purposes.
+committed and pushed when permitted. The release notes is automatically copied
+to the clipboard or print if copying failed.
