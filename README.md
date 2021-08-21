@@ -11,11 +11,15 @@ normal ninja pot generator doesn't detect rust gettext macros (i.e. gettext!)
 even when added as a keyword. This temporarily removes the `!`, generate the pot
 file, and restore the previous state.
 
-### release-notes
+### make-release
 
 ```shell
-python3 release-notes.py [-h] appstream_file
+python3 make-release.py [-h] project_dir version
 ```
 
-Generate a release note based on the latest release in the appstream file. When
-importing succeeds, the text is automatically copied to clipboard.
+Replaces the version on meson.build and Cargo.toml to the version provided. It
+skips them when the files are not found. It also opens gedit to ask for release
+notes which will be written automatically to the metainfo file. It is also 
+skipped when either the file is not found or cancelled. Finally, the changes are
+committed and pushed when not cancelled. The release notes are also printed in
+the terminal for other purposes.

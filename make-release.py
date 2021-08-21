@@ -102,6 +102,9 @@ class Project:
         header = output.pop(0)
         body = output
 
+        log("Metainfo file found")
+        log("Updating the metainfo file with the provided release notes and version")
+
         with open(self.metainfo_file, 'r+') as file:
             file_lines = file.readlines()
             for index, line in enumerate(file_lines):
@@ -111,6 +114,33 @@ class Project:
             file.truncate(0)
             file.seek(0)
             file.writelines(file_lines)
+
+        log("Successfully updated metainfo with latest release")
+
+        release_note_lines = [f"* {line}" for line in body]
+        release_note_lines.insert(0, header)
+        release_note = "\n".join(release_note_lines)
+
+        try:
+            import gi
+            gi.require_version('Gtk', '3.0')
+            from gi.repository import Gtk, Gdk
+
+            # FIXME Not working, so raise ImportError for now
+            raise ImportError
+
+            clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+            clipboard.set_text(release_note, -1)
+            clipboard.store()
+
+            log(f"Copied release notes for version {self.new_version} to clipboard")
+        except ImportError:
+            log("Failed to import `Gtk` and `Gdk`")
+            log(f"Printing the release notes for version {self.new_version} instead...")
+
+            print(release_note)
+
+        log("Copy and paste this release note to github and make a release")
 
     def set_new_version(self, new_version: str):
         self.new_version = new_version
@@ -158,44 +188,6 @@ def main(project_directory: str, new_version: str):
     project.commit_and_push_changes()
 
     log("Make sure to also update the pot files")
-    log("Copy and paste this release note to github and make a release")
-
-    # FIXME paste release notes here
-
-# tree = ElementTree.parse(args.appstream_file)
-# root = tree.getroot()
-
-# releases = root.find('releases')
-# latest_release = releases[0]
-
-# latest_version = latest_release.get('version')
-# latest_release_description = latest_release.find('description')
-
-# header = latest_release_description.find('p')
-# body = latest_release_description.find('ul')
-
-# lines = [f"* {line.text}" for line in body]
-# lines.insert(0, header.text)
-# output = "\n".join(lines)
-
-# try:
-#     import gi
-#     gi.require_version('Gtk', '3.0')
-#     from gi.repository import Gtk, Gdk
-
-    # FIXME Not working, so raise ImportError for now
-#     raise ImportError
-
-#     clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-#     clipboard.set_text(output, -1)
-#     clipboard.store()
-
-#     log(f"Copied release notes for version {latest_version} to clipboard")
-# except ImportError:
-#     log("Failed to import `Gtk` and `Gdk`")
-#     log(f"Printing the release notes for version {latest_version} instead...")
-
-#     print(output)
 
 
 if __name__ == '__main__':
