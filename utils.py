@@ -72,3 +72,8 @@ def get_user_input_from_gedit() -> list:
 
         if c_input("Do you want to try again? [y/N]") not in ("y", "Y"):
             return None
+
+
+def copy_to_clipboard(text: str):
+    echo_text = subprocess.run(["echo", text], check=True, capture_output=True)
+    subprocess.run(["xclip", "-selection", "clipboard"], input=echo_text.stdout)

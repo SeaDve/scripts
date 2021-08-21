@@ -119,25 +119,14 @@ class Project:
         release_note = "\n".join(release_note_lines)
 
         try:
-            import gi
-            gi.require_version('Gtk', '3.0')
-            from gi.repository import Gtk, Gdk
-
-            # FIXME Not working, so raise ImportError for now
-            raise ImportError
-
-            clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-            clipboard.set_text(release_note, -1)
-            clipboard.store()
-
+            utils.copy_to_clipboard(release_note)
             log(f"Copied release notes for version {self.new_version} to clipboard")
-        except ImportError:
-            log("Failed to import `Gtk` and `Gdk`")
+            log("You can now paste the release note to github and make a release")
+        except FileNotFoundError:
+            log("Failed to copy release_note to clipboard")
             log(f"Printing the release notes for version {self.new_version} instead...")
-
             print(release_note)
-
-        log("Copy and paste this release note to github and make a release")
+            log("Copy and paste this release note to github and make a release")
 
     def set_new_version(self, new_version: str):
         self.new_version = new_version
