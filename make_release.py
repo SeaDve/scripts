@@ -11,37 +11,16 @@ import utils
 from utils import info, c_input
 
 
-def show_diff_main_branch_from_last_tagged(metainfo_file: Path) -> None:
-    homepage_uri = find_homepage(metainfo_file)
-
-    if not homepage_uri:
-        info("No homepage uri found")
-        info("Skipping show diff of main branch from last tagged")
-        return
-
+def show_diff_main_branch_from_last_tagged(homepage_uri: str) -> None:
     last_tagged_version = subprocess.run(
         ['git', 'describe', '--tags', '--abbrev=0'],
         check=True, capture_output=True, text=True
-    ).stdout
+    ).stdout.rstrip()
 
     uri = os.path.join(homepage_uri, 'compare', f'{last_tagged_version}...main')
 
     info(f"Opening uri at '{uri}'")
     utils.launch_web_for_uri(uri)
-
-
-def find_homepage(metainfo_file: Path) -> Optional[str]:
-    line = utils.find_in_file("homepage", metainfo_file)
-
-    if not line:
-        return None
-
-    match = re.search('>(.*)<', line)
-
-    if not match:
-        return None
-
-    return match.group(1)
 
 
 def create_new_release_template(header: str, body: List[str], version: str) -> str:
@@ -75,6 +54,22 @@ class Project:
         self.metainfo_file = self._get_metainfo_file()
         self.meson_build_file = self._get_meson_build_file()
         self.cargo_toml_file = self._get_cargo_toml_file()
+
+    def _get_repo_homepage(self) -> Optional[str]:
+        if not self.metainfo_file:
+            return None
+
+        line = utils.find_in_file("homepage", self.metainfo_file)
+
+        if not line:
+            return None
+
+        match = re.search('>(.*)<', line)
+
+        if not match:
+            return None
+
+        return match.group(1)
 
     def _get_metainfo_file(self) -> Optional[Path]:
         data_files = os.listdir(self.directory / 'data')
@@ -129,8 +124,13 @@ class Project:
             info("Skipping metainfo release notes update...")
             return
 
-        info("Showing changes from last tagged version to main branch...")
-        show_diff_main_branch_from_last_tagged(self.metainfo_file)
+        homepage_uri = self._get_repo_homepage()
+        if not homepage_uri:
+            info("No homepage uri found")
+            info("Skipping show diff of main branch from last tagged")
+        else:
+            info("Showing changes from last tagged version to main branch...")
+            show_diff_main_branch_from_last_tagged(homepage_uri)
 
         info("Launching Gedit...")
         info("Write the release notes in the window and save the file")
