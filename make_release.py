@@ -55,22 +55,6 @@ class Project:
         self.meson_build_file = self._get_meson_build_file()
         self.cargo_toml_file = self._get_cargo_toml_file()
 
-    def _get_repo_homepage(self) -> Optional[str]:
-        if not self.metainfo_file:
-            return None
-
-        line = utils.find_in_file("homepage", self.metainfo_file)
-
-        if not line:
-            return None
-
-        match = re.search('>(.*)<', line)
-
-        if not match:
-            return None
-
-        return match.group(1)
-
     def _get_metainfo_file(self) -> Optional[Path]:
         data_files = os.listdir(self.directory / 'data')
         for file in data_files:
@@ -124,7 +108,7 @@ class Project:
             info("Skipping metainfo release notes update...")
             return
 
-        homepage_uri = self._get_repo_homepage()
+        homepage_uri = self.get_repo_homepage()
         if not homepage_uri:
             info("No homepage uri found")
             info("Skipping show diff of main branch from last tagged")
@@ -172,6 +156,22 @@ class Project:
             info(f"Printing the release notes for version {self.new_version} instead...")
             print(release_note)
             info("Copy and paste this release note to github and make a release")
+
+    def get_repo_homepage(self) -> Optional[str]:
+        if not self.metainfo_file:
+            return None
+
+        line = utils.find_in_file("homepage", self.metainfo_file)
+
+        if not line:
+            return None
+
+        match = re.search('>(.*)<', line)
+
+        if not match:
+            return None
+
+        return match.group(1)
 
     def set_new_version(self, new_version: str) -> None:
         self.new_version = new_version
@@ -221,6 +221,11 @@ def main(project_directory: Path, new_version: str) -> None:
     project.commit_and_push_changes()
 
     info("Make sure to also update the pot files")
+
+    if c_input("Do you want to open a browser to create a new release? [y/N]") in ("y", "Y"):
+        project_homepage = project.get_repo_homepage()
+        if project_homepage is not None:
+            utils.launch_web_for_uri(os.path.join(project_homepage, 'releases', 'new'))
 
 
 if __name__ == '__main__':
