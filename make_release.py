@@ -185,15 +185,15 @@ class Project:
 
         if self.metainfo_file is not None:
             subprocess.run(['git', 'add', self.metainfo_file], check=True)
-            info("Added meson build to staged files")
+            info("Added metainfo to staged files")
 
         if self.meson_build_file is not None:
             subprocess.run(['git', 'add', self.meson_build_file], check=True)
-            info("Added cargo toml to staged files")
+            info("Added meson build to staged files")
 
         if self.cargo_toml_file is not None:
             subprocess.run(['git', 'add', self.cargo_toml_file], check=True)
-            info("Added metainfo to staged files")
+            info("Added cargo toml to staged files")
 
         subprocess.run(['git', 'commit', '-m', f'chore: Bump to {self.new_version}'], check=True)
         info("Changes committed")
