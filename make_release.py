@@ -8,15 +8,15 @@ from pathlib import Path
 from typing import Optional, List
 
 import utils
-from utils import log, c_input
+from utils import info, c_input
 
 
 def show_diff_main_branch_from_last_tagged(metainfo_file: Path) -> None:
     homepage_uri = find_homepage(metainfo_file)
 
     if not homepage_uri:
-        log("No homepage uri found")
-        log("Skipping show diff of main branch from last tagged")
+        info("No homepage uri found")
+        info("Skipping show diff of main branch from last tagged")
         return
 
     last_tagged_version = subprocess.run(
@@ -25,6 +25,8 @@ def show_diff_main_branch_from_last_tagged(metainfo_file: Path) -> None:
     ).stdout
 
     uri = os.path.join(homepage_uri, 'compare', f'{last_tagged_version}...main')
+
+    info(f"Opening uri at '{uri}'")
     utils.launch_web_for_uri(uri)
 
 
@@ -93,57 +95,57 @@ class Project:
 
     def _update_meson_version(self) -> None:
         if self.meson_build_file is None:
-            log("Meson build file not found")
-            log("Skipping meson version update...")
+            info("Meson build file not found")
+            info("Skipping meson version update...")
             return
 
-        log("Meson build file found")
-        log("Replacing meson build version with new_version...")
+        info(f"Meson build file found at '{self.meson_build_file}'")
+        info("Replacing meson build version with new_version...")
 
-        utils.replace_in_file(
+        utils.find_and_replace_in_file(
             r"version:\s*'(.*)'", f"version: '{self.new_version}'",
             self.meson_build_file
         )
-        log("Successfully replaced meson build's version with new version")
+        info("Successfully replaced meson build's version with new version")
 
     def _update_cargo_version(self) -> None:
         if self.cargo_toml_file is None:
-            log("Cargo toml file not found")
-            log("Skipping cargo version update...")
+            info("Cargo toml file not found")
+            info("Skipping cargo version update...")
             return
 
-        log("Cargo toml file found")
-        log("Replacing cargo toml version with new_version...")
+        info(f"Cargo toml file found at '{self.cargo_toml_file}'")
+        info("Replacing cargo toml version with new_version...")
 
-        utils.replace_in_file(
+        utils.find_and_replace_in_file(
             r'version\s*=\s*"(.*)"', f'version = "{self.new_version}"',
             self.cargo_toml_file
         )
-        log("Successfully replaced cargo toml's version with new version")
+        info("Successfully replaced cargo toml's version with new version")
 
     def _update_metainfo_release_notes(self) -> None:
         if self.metainfo_file is None:
-            log("Metainfo file not found")
-            log("Skipping metainfo release notes update...")
+            info("Metainfo file not found")
+            info("Skipping metainfo release notes update...")
             return
 
-        log("Showing changes from last tagged version to main branch...")
+        info("Showing changes from last tagged version to main branch...")
         show_diff_main_branch_from_last_tagged(self.metainfo_file)
 
-        log("Launching Gedit...")
-        log("Write the release notes in the window and save the file")
+        info("Launching Gedit...")
+        info("Write the release notes in the window and save the file")
 
         output = utils.get_user_input_from_gedit()
         if output is None:
-            log("Failed to get release notes")
-            log("Skipping metainfo release notes update...")
+            info("Failed to get release notes")
+            info("Skipping metainfo release notes update...")
             return
 
         header = output.pop(0)
         body = output
 
-        log("Metainfo file found")
-        log("Updating the metainfo file with the provided release notes and version")
+        info(f"Metainfo file found at '{self.metainfo_file}'")
+        info("Updating the metainfo file with the provided release notes and version")
 
         with self.metainfo_file.open(mode='r+') as file:
             file_lines = file.readlines()
@@ -155,7 +157,7 @@ class Project:
             file.seek(0)
             file.writelines(file_lines)
 
-        log("Successfully updated metainfo with latest release")
+        info("Successfully updated metainfo with latest release")
 
         release_note_lines = [f"* {line}" for line in body]
         release_note_lines.insert(0, header)
@@ -163,13 +165,13 @@ class Project:
 
         try:
             utils.copy_to_clipboard(release_note)
-            log(f"Copied release notes for version {self.new_version} to clipboard")
-            log("You can now paste the release note to github and make a release")
+            info(f"Copied release notes for version {self.new_version} to clipboard")
+            info("You can now paste the release note to github and make a release")
         except FileNotFoundError:
-            log("Failed to copy release_note to clipboard")
-            log(f"Printing the release notes for version {self.new_version} instead...")
+            info("Failed to copy release_note to clipboard")
+            info(f"Printing the release notes for version {self.new_version} instead...")
             print(release_note)
-            log("Copy and paste this release note to github and make a release")
+            info("Copy and paste this release note to github and make a release")
 
     def set_new_version(self, new_version: str) -> None:
         self.new_version = new_version
@@ -183,27 +185,27 @@ class Project:
 
         if self.metainfo_file is not None:
             subprocess.run(['git', 'add', self.metainfo_file], check=True)
-            log("Added meson build to staged files")
+            info("Added meson build to staged files")
 
         if self.meson_build_file is not None:
             subprocess.run(['git', 'add', self.meson_build_file], check=True)
-            log("Added cargo toml to staged files")
+            info("Added cargo toml to staged files")
 
         if self.cargo_toml_file is not None:
             subprocess.run(['git', 'add', self.cargo_toml_file], check=True)
-            log("Added metainfo to staged files")
+            info("Added metainfo to staged files")
 
         subprocess.run(['git', 'commit', '-m', f'chore: Bump to {self.new_version}'], check=True)
-        log("Changes committed")
+        info("Changes committed")
 
         if c_input("Do you want to push the changes? [y/N]") not in ("y", "Y"):
             return
 
         subprocess.run(['git', 'pull', 'origin', 'main'], check=True)
-        log("Pulled changes from origin/main")
+        info("Pulled changes from origin/main")
 
         subprocess.run(['git', 'push', 'origin', 'main'], check=True)
-        log("Pushed local changes to origin/main")
+        info("Pushed local changes to origin/main")
 
 
 def main(project_directory: Path, new_version: str) -> None:
@@ -212,13 +214,13 @@ def main(project_directory: Path, new_version: str) -> None:
     ) not in ("y", "Y"):
         return
 
-    log(f"Making release for version {new_version}...")
+    info(f"Making release for version {new_version}...")
 
     project = Project(project_directory)
     project.set_new_version(new_version)
     project.commit_and_push_changes()
 
-    log("Make sure to also update the pot files")
+    info("Make sure to also update the pot files")
 
 
 if __name__ == '__main__':

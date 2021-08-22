@@ -17,7 +17,7 @@ def print_colored(header: str, text: str) -> None:
     print(f"{BOLD}{BLUE}{header}{ENDC}: {text}")
 
 
-def log(text: str) -> None:
+def info(text: str) -> None:
     print_colored("INFO", text)
 
 
@@ -37,7 +37,7 @@ def find_in_file(pattern: str, file_directory: Path) -> Optional[str]:
         return None
 
 
-def replace_in_file(pattern: str, replacement: str, file_directory: Path) -> None:
+def find_and_replace_in_file(pattern: str, replacement: str, file_directory: Path) -> None:
     with file_directory.open(mode='r+') as file:
         file_contents = file.read()
         new_content = re.sub(pattern, replacement, file_contents, count=1)
@@ -46,7 +46,7 @@ def replace_in_file(pattern: str, replacement: str, file_directory: Path) -> Non
         file.write(new_content)
 
 
-def create_temp_file() -> Path:
+def create_tmp_file() -> Path:
     tmp_file_name = ''.join(random.choice(string.ascii_letters) for _ in range(10))
     tmp_file_location = tempfile.gettempdir()
     tmp_file_dir = Path(tmp_file_location, tmp_file_name)
@@ -58,15 +58,15 @@ def launch_web_for_uri(uri: str) -> None:
     webbrowser.open(uri)
 
 
-def launch_gedit(file_dir: Path) -> None:
+def launch_gedit_for_file(file_dir: Path) -> None:
     subprocess.run(['gedit', file_dir], check=True)
 
 
 def get_user_input_from_gedit() -> Optional[List[str]]:
-    tmp_file = create_temp_file()
+    tmp_file = create_tmp_file()
 
     while True:
-        launch_gedit(tmp_file)
+        launch_gedit_for_file(tmp_file)
 
         with tmp_file.open() as file:
             file_output = file.read().strip().splitlines()

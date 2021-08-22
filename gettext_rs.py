@@ -3,28 +3,28 @@
 import subprocess
 from pathlib import Path
 
-from utils import log, c_input
+from utils import info, c_input
 
 
 def replace_gettext_macros(src_dir: Path) -> None:
-    log("Replacing 'gettext!' with 'gettext'...")
+    info("Replacing 'gettext!' with 'gettext'...")
     subprocess.run(
         ["find", src_dir, "-type", "f", "-exec", "sed", "-i", "s/gettext!/gettext/g", "{}", ";"],
         check=True
     )
-    log("Successfully replaced 'gettext!' with 'gettext'")
+    info("Successfully replaced 'gettext!' with 'gettext'")
 
 
 def generate_pot_files(build_dir: Path, project_name: str) -> None:
-    log("Generating pot file...")
+    info("Generating pot file...")
     subprocess.run(["ninja", "-C", build_dir, f"{project_name}-pot"], check=True)
-    log("Pot file has been successfully generated")
+    info("Pot file has been successfully generated")
 
 
 def restore_directory(src_dir: Path) -> None:
-    log("Restoring src directory...")
+    info("Restoring src directory...")
     subprocess.run(["git", "restore", src_dir], check=True)
-    log("The src directory has been restored to previous state")
+    info("The src directory has been restored to previous state")
 
 
 def main(project_name: str, src_dir: Path, build_dir: Path) -> None:
@@ -37,7 +37,7 @@ def main(project_name: str, src_dir: Path, build_dir: Path) -> None:
         replace_gettext_macros(src_dir)
         generate_pot_files(build_dir, project_name)
     except subprocess.CalledProcessError as error:
-        log(f"An error has occured: {error}")
+        info(f"An error has occured: {error}")
     finally:
         restore_directory(src_dir)
 
