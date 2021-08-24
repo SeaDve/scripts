@@ -179,10 +179,7 @@ class Project:
         self._update_meson_version()
         self._update_metainfo_release_notes()
 
-    def commit_and_push_changes(self) -> None:
-        if c_input("Do you want to commit the changes? [y/N]") not in ("y", "Y"):
-            return
-
+    def commit_changes(self) -> None:
         if self.metainfo_file is not None:
             subprocess.run(['git', 'add', self.metainfo_file], check=True)
             info("Added metainfo to staged files")
@@ -198,9 +195,7 @@ class Project:
         subprocess.run(['git', 'commit', '-m', f'chore: Bump to {self.new_version}'], check=True)
         info("Changes committed")
 
-        if c_input("Do you want to push the changes? [y/N]") not in ("y", "Y"):
-            return
-
+    def push_changes_to_remote_repo(self) -> None:
         subprocess.run(['git', 'pull', 'origin', 'main'], check=True)
         info("Pulled changes from origin/main")
 
@@ -218,14 +213,19 @@ def main(project_directory: Path, new_version: str) -> None:
 
     project = Project(project_directory)
     project.set_new_version(new_version)
-    project.commit_and_push_changes()
 
-    info("Make sure to also update the pot files")
+    if c_input("Do you want to commit the changes? [y/N]") in ("y", "Y"):
+        project.commit_changes()
+        if c_input("Do you want to push the changes? [y/N]") in ("y", "Y"):
+            project.push_changes_to_remote_repo()
 
     if c_input("Do you want to open a browser to create a new release? [y/N]") in ("y", "Y"):
         project_homepage = project.get_repo_homepage()
         if project_homepage is not None:
             utils.launch_web_for_uri(os.path.join(project_homepage, 'releases', 'new'))
+            info("Opened webpage to create a release")
+
+    info("Make sure to also update the pot files")
 
 
 if __name__ == '__main__':
