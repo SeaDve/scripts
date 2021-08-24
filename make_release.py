@@ -179,6 +179,10 @@ class Project:
         self._update_meson_version()
         self._update_metainfo_release_notes()
 
+    def fetch_origin(self) -> None:
+        subprocess.run(['git', 'fetch'], check=True)
+        info("Running git fetch")
+
     def commit_changes(self) -> None:
         if self.metainfo_file is not None:
             subprocess.run(['git', 'add', self.metainfo_file], check=True)
@@ -212,6 +216,7 @@ def main(project_directory: Path, new_version: str) -> None:
     info(f"Making release for version {new_version}...")
 
     project = Project(project_directory)
+    project.fetch_origin()
     project.set_new_version(new_version)
 
     if c_input("Do you want to commit the changes? [y/N]") in ("y", "Y"):
