@@ -180,8 +180,9 @@ class Project:
         self._update_metainfo_release_notes()
 
     def fetch_origin(self) -> None:
+        info("Running git fetch...")
         subprocess.run(['git', 'fetch'], check=True)
-        info("Running git fetch")
+        info("Sucessfully run git fetch")
 
     def commit_changes(self) -> None:
         if self.metainfo_file is not None:
