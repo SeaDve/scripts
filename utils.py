@@ -85,6 +85,13 @@ def get_user_input_from_gedit() -> Optional[List[str]]:
             return None
 
 
+def init_xclip() -> None:
+    subprocess.run(['xclip'], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+
+
 def copy_to_clipboard(text: str) -> None:
+    # We need to initialize xwayland and xclip or else copy to clipboard wont
+    # work properly on first go.
+
     echo_text = subprocess.run(['echo', text], check=True, capture_output=True)
     subprocess.run(['xclip', '-selection', 'clipboard'], check=True, input=echo_text.stdout)
