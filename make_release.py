@@ -214,8 +214,6 @@ def main(project_directory: Path, new_version: str) -> None:
     ) not in ("y", "Y"):
         return
 
-    utils.init_xclip()
-
     info(f"Making release for version {new_version}...")
 
     project = Project(project_directory)
