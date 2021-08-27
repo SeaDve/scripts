@@ -11,12 +11,7 @@ import utils
 from utils import info, c_input
 
 
-def show_diff_main_branch_from_last_tagged(homepage_uri: str) -> None:
-    last_tagged_version = subprocess.run(
-        ['git', 'describe', '--tags', '--abbrev=0'],
-        check=True, capture_output=True, text=True
-    ).stdout.rstrip()
-
+def show_diff_main_branch_from_last_tagged(homepage_uri: str, last_tagged_version: str) -> None:
     uri = os.path.join(homepage_uri, 'compare', f'{last_tagged_version}...main')
 
     info(f"Opening uri at '{uri}'")
@@ -114,7 +109,8 @@ class Project:
             info("Skipping show diff of main branch from last tagged")
         else:
             info("Showing changes from last tagged version to main branch...")
-            show_diff_main_branch_from_last_tagged(homepage_uri)
+            last_tagged_version = self.get_last_tagged_version()
+            show_diff_main_branch_from_last_tagged(homepage_uri, last_tagged_version)
 
         info("Launching Gedit...")
         info("Write the release notes in the window and save the file")
@@ -173,6 +169,12 @@ class Project:
 
         return match.group(1)
 
+    def get_last_tagged_version(self) -> str:
+        return subprocess.run(
+            ['git', 'describe', '--tags', '--abbrev=0'],
+            check=True, capture_output=True, text=True
+        ).stdout.rstrip()
+
     def set_new_version(self, new_version: str) -> None:
         self.new_version = new_version
         self._update_cargo_version()
@@ -214,10 +216,18 @@ def main(project_directory: Path, new_version: str) -> None:
     ) not in ("y", "Y"):
         return
 
-    info(f"Making release for version {new_version}...")
+    if project_directory is None:
+        project_directory = Path(os.getcwd())
 
     project = Project(project_directory)
     project.fetch_origin()
+
+    if new_version is None:
+        last_version = project.get_last_tagged_version()
+        new_version = c_input(f"Last version was '{last_version}'. What version do you want next?")
+
+    info(f"Making release for version {new_version}...")
+
     project.set_new_version(new_version)
 
     if c_input("Do you want to commit the changes? [y/N]") in ("y", "Y"):
@@ -238,8 +248,10 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('project_dir', help="The root directory of the project", type=Path)
-    parser.add_argument('version', help="The new version in format $N.$N.$N", type=str)
+    parser.add_argument('-p', '--project-dir', type=str, required=False,
+                        help="The root directory of the project")
+    parser.add_argument('-n', '--new-version', type=Path, required=False,
+                        help="The new version in format $N.$N.$N")
     args = parser.parse_args()
 
-    main(args.project_dir, args.version)
+    main(args.project_dir, args.new_version)

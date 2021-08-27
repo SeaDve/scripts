@@ -22,7 +22,7 @@ def info(text: str) -> None:
 
 
 def input_colored(header: str, text: str) -> str:
-    return input(f"{BOLD}{TURQUOISE}{header}{ENDC}: {text}")
+    return input(f"{BOLD}{TURQUOISE}{header}{ENDC}: {text} ")
 
 
 def c_input(text: str) -> str:
