@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-import re
 import subprocess
 from pathlib import Path
 from typing import Optional
@@ -20,7 +19,7 @@ class Project:
         self.project_name = self._get_project_name()
 
     def _get_project_name(self) -> Optional[str]:
-        matches = utils.find_in_file("project\([\r\n]*.*'(.*)'", self.directory / 'meson.build')
+        matches = utils.find_in_file(r"project\([\r\n]*.*'(.*)'", self.directory / 'meson.build')
 
         if len(matches) < 1:
             return None
