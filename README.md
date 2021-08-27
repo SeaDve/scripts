@@ -3,7 +3,7 @@
 ### gettext-rs
 
 ```shell
-python3 gettext-rs.py [-h] project_name src_dir build_dir
+gettext_rs.py [-h] [-p PROJECT_NAME] [-s SRC_DIR] [-b BUILD_DIR]
 ```
 
 Hack to generate pot files for rust files with gettext macros. For some reason,
@@ -14,7 +14,7 @@ file, and restore the previous state.
 ### make-release
 
 ```shell
-python3 make-release.py [-h] project_dir version
+gettext_rs.py [-h] [-s SRC_DIR] [-b BUILD_DIR]
 ```
 
 Replaces the version on meson.build and Cargo.toml to the version provided. It
