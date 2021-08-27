@@ -19,6 +19,10 @@ class Project:
 
         self.project_name = self._get_project_name()
 
+        info(f"Project src dir found is {self.src_dir}")
+        info(f"Project build dir found is {self.build_dir}")
+        info(f"Project name found is {self.project_name}")
+
     def _get_project_name(self) -> Optional[str]:
         line = utils.find_in_file("project", self.directory / 'meson.build')
 
