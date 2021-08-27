@@ -216,9 +216,6 @@ def main(project_directory: Path, new_version: str) -> None:
     ) not in ("y", "Y"):
         return
 
-    if project_directory is None:
-        project_directory = Path(os.getcwd())
-
     project = Project(project_directory)
     project.fetch_origin()
 
@@ -248,9 +245,9 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--project-dir', type=str, required=False,
+    parser.add_argument('-p', '--project-dir', type=Path, required=False, default=os.getcwd(),
                         help="The root directory of the project")
-    parser.add_argument('-n', '--new-version', type=Path, required=False,
+    parser.add_argument('-n', '--new-version', type=str, required=False,
                         help="The new version in format $N.$N.$N")
     args = parser.parse_args()
 
