@@ -220,7 +220,7 @@ def main(project_directory: Path, new_version: str) -> None:
     project.fetch_origin()
 
     if new_version is None:
-        last_version = project.get_last_tagged_version()
+        last_version = project.get_last_tagged_version().lstrip('v')
         new_version = c_input(f"Last version was '{last_version}'. What version do you want next?")
 
     info(f"Making release for version {new_version}...")
