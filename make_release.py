@@ -157,7 +157,7 @@ class Project:
             return None
 
         matches = utils.find_in_file(
-            '<url type="(*.)">https://github.com/SeaDve/Kooha</url>',
+            'type="homepage">(.*)<',
             self.metainfo_file
         )
 
