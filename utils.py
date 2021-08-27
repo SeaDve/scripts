@@ -29,12 +29,9 @@ def c_input(text: str) -> str:
     return input_colored("CONSOLE", text)
 
 
-def find_in_file(pattern: str, file_directory: Path) -> Optional[str]:
+def find_in_file(pattern: str, file_directory: Path) -> List[str]:
     with file_directory.open() as file:
-        for line in file:
-            if pattern in line:
-                return line
-        return None
+        return re.findall(pattern, file.read())
 
 
 def find_and_replace_in_file(pattern: str, replacement: str, file_directory: Path) -> None:

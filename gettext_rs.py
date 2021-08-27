@@ -19,22 +19,13 @@ class Project:
 
         self.project_name = self._get_project_name()
 
-        info(f"Project src dir found is {self.src_dir}")
-        info(f"Project build dir found is {self.build_dir}")
-        info(f"Project name found is {self.project_name}")
-
     def _get_project_name(self) -> Optional[str]:
-        line = utils.find_in_file("project", self.directory / 'meson.build')
+        matches = utils.find_in_file("project\([\r\n]*.*'(.*)'", self.directory / 'meson.build')
 
-        if not line:
+        if len(matches) < 1:
             return None
 
-        match = re.search("'(.*)'", line)
-
-        if not match:
-            return None
-
-        return match.group(1)
+        return matches[0]
 
     def replace_gettext_macros(self) -> None:
         info("Replacing 'gettext!' with 'gettext'...")
@@ -72,6 +63,10 @@ def main(src_dir: Path, build_dir: Path) -> None:
         info(f"An error has occured: {error}")
     finally:
         project.restore_directory()
+
+    info(f"Project src dir found was {project.src_dir}")
+    info(f"Project build dir found was {project.build_dir}")
+    info(f"Project name found was {project.project_name}")
 
 
 if __name__ == '__main__':

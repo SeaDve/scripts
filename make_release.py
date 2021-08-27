@@ -157,17 +157,15 @@ class Project:
         if not self.metainfo_file:
             return None
 
-        line = utils.find_in_file("homepage", self.metainfo_file)
+        matches = utils.find_in_file(
+            '<url type="(*.)">https://github.com/SeaDve/Kooha</url>',
+            self.metainfo_file
+        )
 
-        if not line:
+        if len(matches) < 1:
             return None
 
-        match = re.search('>(.*)<', line)
-
-        if not match:
-            return None
-
-        return match.group(1)
+        return matches[0]
 
     def get_last_tagged_version(self) -> str:
         return subprocess.run(
