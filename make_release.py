@@ -238,6 +238,7 @@ def main(project_directory: Path, new_version: str) -> None:
             utils.launch_web_for_uri(os.path.join(project_homepage, 'releases', 'new'))
             info("Opened webpage to create a release")
 
+    info(f"Successfuly made a new release for {new_version}...")
     info("Make sure to also update the pot files")
 
 
