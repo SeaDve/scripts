@@ -193,7 +193,7 @@ class Project:
             info("Added meson build to staged files")
 
         if self.cargo_toml_file is not None:
-            subprocess.run(['git', 'add', self.cargo_toml_file], check=True)
+            subprocess.run(['git', 'add', self.cargo_toml_file, 'Cargo.lock'], check=True)
             info("Added cargo toml to staged files")
 
         subprocess.run(['git', 'commit', '-m', f'chore: Bump to {self.new_version}'], check=True)
