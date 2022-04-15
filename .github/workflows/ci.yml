@@ -22,7 +22,7 @@ jobs:
           pip install flake8
       - name: Lint with flake8
         run: |
-          flake8 --max-complexity=10 --max-line-length=99 --show-source --statistics
+          flake8 --max-complexity=10 --max-line-length=200 --show-source --statistics
 
   mypy:
     name: "Static Type Checker"

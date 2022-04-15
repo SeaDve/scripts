@@ -86,16 +86,16 @@ class Check(ABC):
 class Rustfmt(Check):
     """Run rustfmt to enforce code style."""
 
-    def version(self):
+    def version(self) -> Optional[str]:
         try:
             return get_output(["cargo", "fmt", "--version"])
         except FileNotFoundError:
             return None
 
-    def subject(self):
+    def subject(self) -> str:
         return "code style"
 
-    def run(self):
+    def run(self) -> None:
         try:
             return_code, output = run_and_get_output(
                 ["cargo", "fmt", "--all", "--", "--check"]
@@ -115,7 +115,7 @@ class Rustfmt(Check):
 class Typos(Check):
     """Run typos to check for spelling mistakes."""
 
-    def version(self):
+    def version(self) -> Optional[str]:
         try:
             return_code, output = self._run_typos(["--version"])
 
@@ -126,10 +126,10 @@ class Typos(Check):
         except FileNotFoundError:
             return None
 
-    def subject(self):
+    def subject(self) -> str:
         return "spelling mistakes"
 
-    def run(self):
+    def run(self) -> None:
         try:
             return_code, output = self._run_typos(["--color", "always"])
         except FileNotFoundError:
@@ -159,13 +159,13 @@ class PotfilesAlphabetically(Check):
         - POTFILES is located at `po/POTFILES.in`
     """
 
-    def version(self):
+    def version(self) -> None:
         return None
 
-    def subject(self):
+    def subject(self) -> str:
         return "po/POTFILES.in alphabetical order"
 
-    def run(self):
+    def run(self) -> None:
         files = self._get_files()
 
         for file, sorted_file in zip(files, sorted(files)):
@@ -188,13 +188,13 @@ class PotfilesExist(Check):
         - POTFILES is located at 'po/POTFILES.in'
     """
 
-    def version(self):
+    def version(self) -> None:
         return None
 
-    def subject(self):
+    def subject(self) -> str:
         return "po/POTFILES.in all files exist"
 
-    def run(self):
+    def run(self) -> None:
         files = self._get_non_existent_files()
         n_files = len(files)
 
@@ -236,13 +236,13 @@ class PotfilesSanity(Check):
         - Rust files are located in `src` and use `*gettext` methods or macros
     """
 
-    def version(self):
+    def version(self) -> None:
         return None
 
-    def subject(self):
+    def subject(self) -> str:
         return "po/POTFILES.in sanity"
 
-    def run(self):
+    def run(self) -> None:
         potfiles = self._get_rust_or_ui_potfiles()
         files_with_translatable = self._get_ui_files() + self._get_rust_files()
 
@@ -341,13 +341,13 @@ class Resources(Check):
         - only one gresource in the file
     """
 
-    def version(self):
+    def version(self) -> None:
         return None
 
-    def subject(self):
+    def subject(self) -> str:
         return "data/resources/resources.gresource.xml"
 
-    def run(self):
+    def run(self) -> None:
         tree = ElementTree.parse("data/resources/resources.gresource.xml")
         gresource = tree.find("gresource")
 
@@ -375,14 +375,14 @@ class LeftoverDebugPrints(Check):
         column_number: int
         pattern: str
 
-    def version(self):
+    def version(self) -> None:
         return None
 
-    def subject(self):
+    def subject(self) -> str:
         joined = ", ".join(self._get_patterns())
         return f"no leftover {joined}"
 
-    def run(self):
+    def run(self) -> None:
         leftovers = self._get_matches(self._get_patterns())
         n_leftovers = len(leftovers)
 
@@ -452,7 +452,9 @@ class Runner:
     def __init__(self, verbose: bool = False):
         self._verbose = verbose
 
-    def add(self, check: Check, skip: bool = False, prerequisites: List[Check] = []):
+    def add(
+        self, check: Check, skip: bool = False, prerequisites: List[Check] = []
+    ) -> None:
         check_item = Runner.CheckItem(check, skip, prerequisites)
         self._check_items.append(check_item)
 
@@ -509,7 +511,7 @@ class Runner:
                 return False
         return True
 
-    def _print_has_incomplete_prerequisite(self, item: CheckItem):
+    def _print_has_incomplete_prerequisite(self, item: CheckItem) -> None:
         prerequisites_to_print = [
             prerequisite.subject()
             for prerequisite in item.prerequisites
@@ -523,7 +525,7 @@ class Runner:
             f"{SKIPPED} (requires: {requires_message})",
         )
 
-    def _print_failures(self):
+    def _print_failures(self) -> None:
         print("failures:")
         print("")
 
@@ -548,7 +550,7 @@ class Runner:
         for (check, _) in self._failed_checks:
             print(f"    {check.subject()}")
 
-    def _print_result(self, check: Check, remark: str):
+    def _print_result(self, check: Check, remark: str) -> None:
         messages = ["check", check.subject()]
 
         version = check.version() if self._verbose else None
@@ -563,7 +565,7 @@ class Runner:
     @staticmethod
     def _print_final_result(
         total: int, n_successful: int, n_failed: int, n_skipped: int, duration: float
-    ):
+    ) -> None:
         result = OK if n_failed == 0 else FAILED
 
         print(
