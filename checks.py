@@ -365,7 +365,7 @@ class Resources(Check):
                 )
 
 
-class LeftoverDebugPrints(Check):
+class ForbiddenPatterns(Check):
     """Checks for leftover debug prints in the src directory."""
 
     @dataclass
@@ -403,7 +403,7 @@ class LeftoverDebugPrints(Check):
 
     @staticmethod
     def _get_patterns() -> List[str]:
-        return ["dbg!", "println!", "print!"]
+        return ["dbg!", "println!", "print!", "todo!"]
 
     @staticmethod
     def _get_matches(patterns: List[str]) -> List[Match]:
@@ -423,12 +423,12 @@ class LeftoverDebugPrints(Check):
             ]
         )
 
-        matches: List[LeftoverDebugPrints.Match] = []
+        matches: List[ForbiddenPatterns.Match] = []
 
         for line in output.splitlines():
             path, line_number, column_number, pattern = line.split()
             matches.append(
-                LeftoverDebugPrints.Match(
+                ForbiddenPatterns.Match(
                     Path(path), int(line_number), int(column_number), pattern
                 )
             )
@@ -600,7 +600,7 @@ def main(args: Optional[Namespace]) -> int:
     )
 
     runner.add(Resources())
-    runner.add(LeftoverDebugPrints())
+    runner.add(ForbiddenPatterns())
 
     if runner.run_all():
         return os.EX_OK
