@@ -383,22 +383,22 @@ class ForbiddenPatterns(Check):
         return f"no {joined}"
 
     def run(self) -> None:
-        forbiddens = self._get_matches(self._get_patterns())
-        n_forbiddens = len(forbiddens)
+        matches = self._get_matches(self._get_patterns())
+        n_matches = len(matches)
 
-        if n_forbiddens > 0:
+        if n_matches > 0:
             message = [
-                f"{ERROR}: Found {n_forbiddens} forbidden pattern{'s'[:n_forbiddens^1]}:"
+                f"{ERROR}: Found {n_matches} forbidden pattern{'s'[:n_matches^1]}:"
             ]
 
-            for forbidden in forbiddens:
+            for match in matches:
                 message.append(
-                    f"found `{forbidden.pattern}` at {forbidden.path}:{forbidden.line_number}:{forbidden.column_number}"
+                    f"found `{match.pattern}` at {match.path}:{match.line_number}:{match.column_number}"
                 )
 
             raise FailedCheckError(
                 error_message="\n".join(message),
-                suggestion_message="Please use `log::*` macros instead for logging",
+                suggestion_message="Please use `log::*` macros instead for logging or implement todo!",
             )
 
     @staticmethod
