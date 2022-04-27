@@ -366,7 +366,7 @@ class Resources(Check):
 
 
 class ForbiddenPatterns(Check):
-    """Checks for leftover debug prints in the src directory."""
+    """Checks for forbidden patterns in the src directory."""
 
     @dataclass
     class Match:
@@ -380,20 +380,20 @@ class ForbiddenPatterns(Check):
 
     def subject(self) -> str:
         joined = ", ".join(self._get_patterns())
-        return f"no leftover {joined}"
+        return f"no {joined}"
 
     def run(self) -> None:
-        leftovers = self._get_matches(self._get_patterns())
-        n_leftovers = len(leftovers)
+        forbiddens = self._get_matches(self._get_patterns())
+        n_forbiddens = len(forbiddens)
 
-        if n_leftovers > 0:
+        if n_forbiddens > 0:
             message = [
-                f"{ERROR}: Found {n_leftovers} leftover debug print{'s'[:n_leftovers^1]}:"
+                f"{ERROR}: Found {n_forbiddens} forbidden pattern{'s'[:n_forbiddens^1]}:"
             ]
 
-            for leftover in leftovers:
+            for forbidden in forbiddens:
                 message.append(
-                    f"leftover `{leftover.pattern}` at {leftover.path}:{leftover.line_number}:{leftover.column_number}"
+                    f"found `{forbidden.pattern}` at {forbidden.path}:{forbidden.line_number}:{forbidden.column_number}"
                 )
 
             raise FailedCheckError(
