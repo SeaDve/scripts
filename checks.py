@@ -369,8 +369,8 @@ class UiFiles(Check):
 
             if (
                 return_code != 0
-                and not "Failed to lookup template parent type" in output
-                and not "Invalid object type" in output
+                and "Failed to lookup template parent type" not in output
+                and "Invalid object type" not in output
             ):
                 raise FailedCheckError(
                     error_message=output,
