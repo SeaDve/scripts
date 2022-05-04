@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import glob
 import os
 import subprocess
 import sys
@@ -76,10 +77,14 @@ class Check(ABC):
 
     @abstractmethod
     def subject(self) -> str:
+        """The string returned is used as an identifier for the check."""
+
         raise NotImplementedError
 
     @abstractmethod
     def run(self) -> None:
+        """If this method did not raise an error, the check is considered successful."""
+
         raise NotImplementedError
 
 
@@ -331,6 +336,46 @@ class PotfilesSanity(Check):
             ]
         )
         return [Path(line) for line in output.splitlines()]
+
+
+class UiFiles(Check):
+    """Validate ui files using gtk4-builder-tool.
+
+    This ignores errors starting with the following:
+        - Failed to lookup template parent type
+        - Invalid object type
+
+    This assumes the following:
+        - ui files are located in `data/resources/ui/*.ui`
+        - only one gresource in the file
+    """
+
+    def version(self) -> None:
+        return None
+
+    def subject(self) -> str:
+        return "data/resources/ui/*.ui validity"
+
+    def run(self) -> None:
+        for ui_file in glob.glob("data/resources/ui/*.ui"):
+            try:
+                return_code, output = run_and_get_output(
+                    ["gtk4-builder-tool", "validate", ui_file]
+                )
+            except FileNotFoundError:
+                raise MissingDependencyError(
+                    "gtk4-devel", install_command="sudo dnf install gtk4-devel"
+                )
+
+            if (
+                return_code != 0
+                and not "Failed to lookup template parent type" in output
+                and not "Invalid object type" in output
+            ):
+                raise FailedCheckError(
+                    error_message=output,
+                    suggestion_message=f"Please fix {ui_file}",
+                )
 
 
 class Resources(Check):
@@ -599,6 +644,7 @@ def main(args: Optional[Namespace]) -> int:
         prerequisites=[potfiles_exist, potfiles_sanity],
     )
 
+    runner.add(UiFiles())
     runner.add(Resources())
     runner.add(ForbiddenPatterns())
 
