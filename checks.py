@@ -379,7 +379,7 @@ class UiFiles(Check):
         if len(errors) != 0:
             raise FailedCheckError(
                 error_message="\n".join(errors),
-                suggestion_message=f"Please fix the given errors on the ui files",
+                suggestion_message="Please fix the given errors on the ui files",
             )
 
 
