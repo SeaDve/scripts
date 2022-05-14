@@ -357,6 +357,8 @@ class UiFiles(Check):
         return "data/resources/ui/*.ui validity"
 
     def run(self) -> None:
+        errors: List[str] = []
+
         for ui_file in glob.glob("data/resources/ui/*.ui"):
             try:
                 return_code, output = run_and_get_output(
@@ -372,10 +374,13 @@ class UiFiles(Check):
                 and "Failed to lookup template parent type" not in output
                 and "Invalid object type" not in output
             ):
-                raise FailedCheckError(
-                    error_message=output,
-                    suggestion_message=f"Please fix {ui_file}",
-                )
+                errors.append(f"> {ui_file} <\n{output}\n")
+
+        if len(errors) != 0:
+            raise FailedCheckError(
+                error_message="\n".join(errors),
+                suggestion_message=f"Please fix the given errors on the ui files",
+            )
 
 
 class Resources(Check):
