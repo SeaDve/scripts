@@ -649,7 +649,7 @@ def main(args: Optional[Namespace]) -> int:
         prerequisites=[potfiles_exist, potfiles_sanity],
     )
 
-    runner.add(UiFiles())
+    runner.add(UiFiles(), skip=args.skip_uifiles if args else False)
     runner.add(Resources())
     runner.add(ForbiddenPatterns())
 
@@ -672,10 +672,16 @@ def parse_args() -> Namespace:
         "-sr",
         "--skip-rustfmt",
         action="store_true",
-        help="Whether to skip running cargo fmt",
+        help="Whether to skip running Rustfmt",
     )
     parser.add_argument(
-        "-st", "--skip-typos", action="store_true", help="Whether to skip running typos"
+        "-st", "--skip-typos", action="store_true", help="Whether to skip running Typos"
+    )
+    parser.add_argument(
+        "-su",
+        "--skip-uifiles",
+        action="store_true",
+        help="Whether to skip running UiFiles",
     )
 
     return parser.parse_args()
