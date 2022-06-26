@@ -7,10 +7,10 @@ import webbrowser
 from pathlib import Path
 from typing import Optional, List
 
-BOLD = '\033[1m'
-BLUE = '\033[34m'
-TURQUOISE = '\033[36m'
-ENDC = '\033[0m'
+BOLD = "\033[1m"
+BLUE = "\033[34m"
+TURQUOISE = "\033[36m"
+ENDC = "\033[0m"
 
 
 def print_colored(header: str, text: str) -> None:
@@ -34,8 +34,10 @@ def find_in_file(pattern: str, file_directory: Path) -> List[str]:
         return re.findall(pattern, file.read())
 
 
-def find_and_replace_in_file(pattern: str, replacement: str, file_directory: Path) -> None:
-    with file_directory.open(mode='r+') as file:
+def find_and_replace_in_file(
+    pattern: str, replacement: str, file_directory: Path
+) -> None:
+    with file_directory.open(mode="r+") as file:
         file_contents = file.read()
         new_content = re.sub(pattern, replacement, file_contents, count=1)
         file.seek(0)
@@ -44,10 +46,10 @@ def find_and_replace_in_file(pattern: str, replacement: str, file_directory: Pat
 
 
 def create_tmp_file() -> Path:
-    tmp_file_name = ''.join(random.choice(string.ascii_letters) for _ in range(10))
+    tmp_file_name = "".join(random.choice(string.ascii_letters) for _ in range(10))
     tmp_file_location = tempfile.gettempdir()
     tmp_file_dir = Path(tmp_file_location, tmp_file_name)
-    subprocess.run(['touch', tmp_file_dir], check=True)
+    subprocess.run(["touch", tmp_file_dir], check=True)
     return tmp_file_dir
 
 
@@ -56,7 +58,7 @@ def launch_web_for_uri(uri: str) -> None:
 
 
 def launch_gedit_for_file(file_dir: Path) -> None:
-    subprocess.run(['gedit', file_dir], check=True)
+    subprocess.run(["gedit", file_dir], check=True)
 
 
 def get_user_input_from_gedit() -> Optional[List[str]]:
@@ -83,4 +85,4 @@ def get_user_input_from_gedit() -> Optional[List[str]]:
 
 
 def copy_to_clipboard(text: str) -> None:
-    subprocess.run(['wl-copy', text], check=True)
+    subprocess.run(["wl-copy", text], check=True)
