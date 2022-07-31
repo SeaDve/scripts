@@ -722,8 +722,7 @@ def parse_args() -> Namespace:
         nargs="+",
         default=[],
         type=CheckID,
-        choices=[check_id.value for check_id in CheckID],
-        help="List of checks to skip",
+        help=f"Checks to skip. It can be any of the following: {', '.join([check_id.value for check_id in CheckID])}",
     )
 
     return parser.parse_args()
