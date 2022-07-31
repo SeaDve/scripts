@@ -100,9 +100,9 @@ class Check(ABC):
 class CheckID(Enum):
     RUSTFMT = "rustfmt"
     TYPOS = "typos"
+    POTFILES_ALPHABETICALLY = "potfiles_alphabetically"
     POTFILES_EXIST = "potfiles_exist"
     POTFILES_SANITY = "potfiles_sanity"
-    POTFILES_ALPHABETICALLY = "potfiles_alphabetically"
     UI_FILES = "ui_files"
     RESOURCES = "resources"
     FORBIDDEN_PATTERNS = "forbidden_patterns"
