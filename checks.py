@@ -71,17 +71,6 @@ class FailedCheckError(CheckError):
         return self._suggestion_message
 
 
-class CheckID(Enum):
-    RUSTFMT = "rustfmt"
-    TYPOS = "typos"
-    POTFILES_EXIST = "potfiles_exist"
-    POTFILES_SANITY = "potfiles_sanity"
-    POTFILES_ALPHABETICALLY = "potfiles_alphabetically"
-    UI_FILES = "ui_files"
-    RESOURCES = "resources"
-    FORBIDDEN_PATTERNS = "forbidden_patterns"
-
-
 class Check(ABC):
     @abstractmethod
     def id(self) -> CheckID:
@@ -106,6 +95,17 @@ class Check(ABC):
         """If this method did not raise an error, the check is considered successful."""
 
         raise NotImplementedError
+
+
+class CheckID(Enum):
+    RUSTFMT = "rustfmt"
+    TYPOS = "typos"
+    POTFILES_EXIST = "potfiles_exist"
+    POTFILES_SANITY = "potfiles_sanity"
+    POTFILES_ALPHABETICALLY = "potfiles_alphabetically"
+    UI_FILES = "ui_files"
+    RESOURCES = "resources"
+    FORBIDDEN_PATTERNS = "forbidden_patterns"
 
 
 class Rustfmt(Check):
