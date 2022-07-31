@@ -9,6 +9,7 @@ import time
 from abc import ABC, abstractmethod
 from argparse import Namespace
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Tuple
 from xml.etree import ElementTree
@@ -70,14 +71,33 @@ class FailedCheckError(CheckError):
         return self._suggestion_message
 
 
+class CheckID(Enum):
+    RUSTFMT = "rustfmt"
+    TYPOS = "typos"
+    POTFILES_EXIST = "potfiles_exist"
+    POTFILES_SANITY = "potfiles_sanity"
+    POTFILES_ALPHABETICALLY = "potfiles_alphabetically"
+    UI_FILES = "ui_files"
+    RESOURCES = "resources"
+    FORBIDDEN_PATTERNS = "forbidden_patterns"
+
+
 class Check(ABC):
     @abstractmethod
+    def id(self) -> CheckID:
+        """Unique identifier for the check."""
+
+        raise NotImplementedError
+
+    @abstractmethod
     def version(self) -> Optional[str]:
+        """The version of the check, if any."""
+
         raise NotImplementedError
 
     @abstractmethod
     def subject(self) -> str:
-        """The string returned is used as an identifier for the check."""
+        """Displayed string while running the check."""
 
         raise NotImplementedError
 
@@ -90,6 +110,9 @@ class Check(ABC):
 
 class Rustfmt(Check):
     """Run rustfmt to enforce code style."""
+
+    def id(self) -> CheckID:
+        return CheckID.RUSTFMT
 
     def version(self) -> Optional[str]:
         try:
@@ -119,6 +142,9 @@ class Rustfmt(Check):
 
 class Typos(Check):
     """Run typos to check for spelling mistakes."""
+
+    def id(self) -> CheckID:
+        return CheckID.TYPOS
 
     def version(self) -> Optional[str]:
         try:
@@ -164,6 +190,9 @@ class PotfilesAlphabetically(Check):
         - POTFILES is located at `po/POTFILES.in`
     """
 
+    def id(self) -> CheckID:
+        return CheckID.POTFILES_ALPHABETICALLY
+
     def version(self) -> None:
         return None
 
@@ -192,6 +221,9 @@ class PotfilesExist(Check):
     This assumes the following:
         - POTFILES is located at 'po/POTFILES.in'
     """
+
+    def id(self) -> CheckID:
+        return CheckID.POTFILES_EXIST
 
     def version(self) -> None:
         return None
@@ -240,6 +272,9 @@ class PotfilesSanity(Check):
         - UI (Glade) files are located in `data/resources/ui` and use `translatable="yes"`
         - Rust files are located in `src` and use `*gettext` methods or macros
     """
+
+    def id(self) -> CheckID:
+        return CheckID.POTFILES_SANITY
 
     def version(self) -> None:
         return None
@@ -350,6 +385,9 @@ class UiFiles(Check):
         - only one gresource in the file
     """
 
+    def id(self) -> CheckID:
+        return CheckID.UI_FILES
+
     def version(self) -> None:
         return None
 
@@ -391,6 +429,9 @@ class Resources(Check):
         - only one gresource in the file
     """
 
+    def id(self) -> CheckID:
+        return CheckID.RESOURCES
+
     def version(self) -> None:
         return None
 
@@ -424,6 +465,9 @@ class ForbiddenPatterns(Check):
         line_number: int
         column_number: int
         pattern: str
+
+    def id(self) -> CheckID:
+        return CheckID.FORBIDDEN_PATTERNS
 
     def version(self) -> None:
         return None
@@ -492,24 +536,26 @@ class Runner:
     @dataclass
     class CheckItem:
         check: Check
-        skip: bool
         prerequisites: List[Check]
 
     _check_items: List[CheckItem] = []
     _successful_checks: List[Check] = []
     _failed_checks: List[Tuple[Check, CheckError]] = []
 
-    def __init__(self, verbose: bool = False):
+    def __init__(
+        self,
+        to_skip: List[CheckID],
+        verbose: bool = False,
+    ):
+        self._to_skip = to_skip
         self._verbose = verbose
 
-    def add(
-        self, check: Check, skip: bool = False, prerequisites: List[Check] = []
-    ) -> None:
-        check_item = Runner.CheckItem(check, skip, prerequisites)
+    def add(self, check: Check, prerequisites: List[Check] = []) -> None:
+        check_item = Runner.CheckItem(check, prerequisites)
         self._check_items.append(check_item)
 
     def run_all(self) -> bool:
-        """Returns true if there are no failed checks. There should be only skipped or successful checks."""
+        """Returns true if there are no failed checks; skipped or successful checks will be allowed."""
 
         n_checks = len(self._check_items)
 
@@ -521,7 +567,7 @@ class Runner:
         start_time = time.time()
 
         for item in self._check_items:
-            if item.skip:
+            if item.check.id() in self._to_skip:
                 n_skipped += 1
                 self._print_result(item.check, f"{SKIPPED} (via command flag)")
                 continue
@@ -636,9 +682,11 @@ def get_output(args: List[str]) -> str:
 
 
 def main(args: Optional[Namespace]) -> int:
-    runner = Runner(verbose=args.verbose if args else False)
-    runner.add(Rustfmt(), skip=args.skip_rustfmt if args else False)
-    runner.add(Typos(), skip=args.skip_typos if args else False)
+    runner = Runner(
+        to_skip=args.skip if args else [], verbose=args.verbose if args else False
+    )
+    runner.add(Rustfmt())
+    runner.add(Typos())
 
     potfiles_exist = PotfilesExist()
     potfiles_sanity = PotfilesSanity()
@@ -649,7 +697,7 @@ def main(args: Optional[Namespace]) -> int:
         prerequisites=[potfiles_exist, potfiles_sanity],
     )
 
-    runner.add(UiFiles(), skip=args.skip_uifiles if args else False)
+    runner.add(UiFiles())
     runner.add(Resources())
     runner.add(ForbiddenPatterns())
 
@@ -669,19 +717,13 @@ def parse_args() -> Namespace:
         "-v", "--verbose", action="store_true", help="Use verbose output"
     )
     parser.add_argument(
-        "-sr",
-        "--skip-rustfmt",
-        action="store_true",
-        help="Whether to skip running Rustfmt",
-    )
-    parser.add_argument(
-        "-st", "--skip-typos", action="store_true", help="Whether to skip running Typos"
-    )
-    parser.add_argument(
-        "-su",
-        "--skip-uifiles",
-        action="store_true",
-        help="Whether to skip running UiFiles",
+        "-s",
+        "--skip",
+        nargs="+",
+        default=[],
+        type=CheckID,
+        choices=[check_id.value for check_id in CheckID],
+        help="List of checks to skip",
     )
 
     return parser.parse_args()
