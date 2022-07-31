@@ -538,10 +538,6 @@ class Runner:
         check: Check
         prerequisites: List[Check]
 
-    _check_items: List[CheckItem] = []
-    _successful_checks: List[Check] = []
-    _failed_checks: List[Tuple[Check, CheckError]] = []
-
     def __init__(
         self,
         to_skip: List[CheckID],
@@ -549,6 +545,10 @@ class Runner:
     ):
         self._to_skip = to_skip
         self._verbose = verbose
+
+        self._check_items: List[Runner.CheckItem] = []
+        self._successful_checks: List[Check] = []
+        self._failed_checks: List[Tuple[Check, CheckError]] = []
 
     def add(self, check: Check, prerequisites: List[Check] = []) -> None:
         check_item = Runner.CheckItem(check, prerequisites)
