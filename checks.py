@@ -105,7 +105,6 @@ class CheckID(Enum):
     POTFILES_SANITY = "potfiles_sanity"
     UI_FILES = "ui_files"
     RESOURCES = "resources"
-    FORBIDDEN_PATTERNS = "forbidden_patterns"
 
 
 class Rustfmt(Check):
@@ -456,80 +455,6 @@ class Resources(Check):
                 )
 
 
-class ForbiddenPatterns(Check):
-    """Checks for forbidden patterns in the src directory."""
-
-    @dataclass
-    class Match:
-        path: Path
-        line_number: int
-        column_number: int
-        pattern: str
-
-    def id(self) -> CheckID:
-        return CheckID.FORBIDDEN_PATTERNS
-
-    def version(self) -> None:
-        return None
-
-    def subject(self) -> str:
-        joined = ", ".join(self._get_patterns())
-        return f"no {joined}"
-
-    def run(self) -> None:
-        matches = self._get_matches(self._get_patterns())
-        n_matches = len(matches)
-
-        if n_matches > 0:
-            message = [
-                f"{ERROR}: Found {n_matches} forbidden pattern{'s'[:n_matches^1]}:"
-            ]
-
-            for match in matches:
-                message.append(
-                    f"found `{match.pattern}` at {match.path}:{match.line_number}:{match.column_number}"
-                )
-
-            raise FailedCheckError(
-                error_message="\n".join(message),
-                suggestion_message="Please use `log::*` macros instead for logging or implement todo!",
-            )
-
-    @staticmethod
-    def _get_patterns() -> List[str]:
-        return ["dbg!", "println!", "print!", "todo!"]
-
-    @staticmethod
-    def _get_matches(patterns: List[str]) -> List[Match]:
-        to_find = "|".join(patterns)
-
-        output = get_output(
-            [
-                "find",
-                "src",
-                "-type",
-                "f",
-                "-exec",
-                "awk",
-                f"match($0, /{to_find}/, p) {{ print FILENAME, FNR, index($0, p[0]), p[0] }}",
-                "{}",
-                ";",
-            ]
-        )
-
-        matches: List[ForbiddenPatterns.Match] = []
-
-        for line in output.splitlines():
-            path, line_number, column_number, pattern = line.split()
-            matches.append(
-                ForbiddenPatterns.Match(
-                    Path(path), int(line_number), int(column_number), pattern
-                )
-            )
-
-        return matches
-
-
 class Runner:
     """Runs the checks."""
 
@@ -699,7 +624,6 @@ def main(args: Optional[Namespace]) -> int:
 
     runner.add(UiFiles())
     runner.add(Resources())
-    runner.add(ForbiddenPatterns())
 
     if runner.run_all():
         return os.EX_OK
