@@ -497,7 +497,18 @@ class ForbiddenPatterns(Check):
 
     @staticmethod
     def _get_patterns() -> List[str]:
-        return ["dbg!", "println!", "print!", "todo!"]
+        gettext_macro_patterns = [
+            "dcgettext!",
+            "dcngettext!",
+            "dgettext!",
+            "dngettext!",
+            "gettext!",
+            "ngettext!",
+            "npgettext!",
+            "pgettext!"
+        ]
+
+        return ["dbg!", "println!", "print!", "todo!", *gettext_macro_patterns]
 
     @staticmethod
     def _get_matches(patterns: List[str]) -> List[Match]:
