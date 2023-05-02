@@ -365,12 +365,14 @@ class PotfilesSanity(Check):
                 "-exec",
                 "grep",
                 "-lIE",
-                r"gettext[!]?\(",
+                r"gettext\(|gettext_f\(|gettext!\(",
                 "{}",
                 ";",
             ]
         )
-        return [Path(line) for line in output.splitlines()]
+
+        # Ignore src/i18n.rs as it contains test cases that are not meant to be translated
+        return [Path(line) for line in output.splitlines() if not line == "src/i18n.rs"]
 
 
 class UiFiles(Check):
